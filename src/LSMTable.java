@@ -1,51 +1,35 @@
 import java.util.TreeMap;
 
 public class LSMTable {
-    public final int memTableSizeLimit = 50;
-    TreeMap<String, TreeMap<String, String>> memTable = new TreeMap<>();
-    int memTableSize = 0;
+    private static final int MAX_MEMTABLE_SIZE = 20;
+    private TreeMap<String, String> memTable;
 
-    LSMTable()
+    public void put(String key, String value)
     {
-
-    }
-
-    public void put(String partitionKey, String dataKey, String val)
-    {
-        if(memTableSize > memTableSizeLimit)
+        try
         {
-            SSTableManager.flushMemTable(memTable);
-            memTableSize = 0;
+            if (memTable.size() > MAX_MEMTABLE_SIZE)
+            {
+                SSTableManager.flushToSSTable(memTable);
+            }
         }
-        addToMemTable(partitionKey, dataKey, val);
-        memTableSize++;
-    }
-
-    public String get(String partitionKey, String dataKey)
-    {
-        if(memTable.containsKey(partitionKey) &&
-           memTable.get(partitionKey).containsKey(dataKey))
+        catch(Exception e)
         {
-            return memTable.get(partitionKey).get(dataKey);
+            e.printStackTrace();
         }
-        else
-        {
-            return SSTableManager.getFromSSTable(partitionKey, dataKey);
-        }
+        memTable.clear();
+        memTable.put(key, value);
     }
 
-    private void addToMemTable(String partitionKey, String dataKey, String val)
+    public String get(String key)
     {
-        if(!memTable.containsKey(partitionKey))
+        if(memTable.containsKey(key))
         {
-            memTable.put(partitionKey, new TreeMap<>());
+            return memTable.get(key);
         }
-        memTable.get(partitionKey).put(dataKey, val);
+
+        return SSTableManager.fetchValForKey(key);
     }
 
-    public int getMemTableSize()
-    {
-
-    }
 
 }
