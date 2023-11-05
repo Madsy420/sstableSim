@@ -7,19 +7,20 @@ import java.util.stream.Collectors;
 
 public class SSTableManager {
 
-    private static final int MAX_SSTABLE_COUNT = 5;
-    private static final String SSTABLE_ROOT_FOLDER = "ROOT//FOLDER//PATH";
-    private static String fetchValueFromFile(String key, String filePath) throws IOException {
+    //This function loads and returns metadata of a SSTable file that can be used to get keys from later
+    public static SSTableCacheObject loadSSTable(String filePath) throws IOException {
         try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
+
+            // First * bytes of the SStable includes the Data block length and number of entries both as Ints(4+4=8)
             int totalDataBlockByteLength = file.readInt();
             int numEntries = file.readInt();
 
             // Skip the data blocks and move to the index block
             file.skipBytes(totalDataBlockByteLength);
 
-            // Read the index block
+            // Read the index block, iterating through it and storing the key offsets vs the key
             int indexSize = file.readInt();
-            TreeMap<String, Long> index = new TreeMap<>();
+            TreeMap<String, Long> indexTable = new TreeMap<>();
             for (int i = 0; i < indexSize; i++) {
                 int keyLength = file.readInt();
                 byte[] keyBytes = new byte[keyLength];
@@ -27,7 +28,7 @@ public class SSTableManager {
                 long offset = file.readLong();
 
                 String indexedKey = new String(keyBytes, StandardCharsets.UTF_8);
-                index.put(indexedKey, offset);
+                indexTable.put(indexedKey, offset);
             }
 
             // Read the Bloom filter
@@ -36,34 +37,9 @@ public class SSTableManager {
             file.readFully(bloomFilterBytes);
             BitSet bloomFilter = BitSet.valueOf(bloomFilterBytes);
 
-            // Check if the key may exist in the SSTable based on the Bloom filter
-            if (bloomFilter.get(Math.abs(key.hashCode() % numEntries))) {
-
-                // Check if the key exists in the index
-                if (index.containsKey(key)) {
-                    long offset = index.get(key);
-
-                    // Move to the data block using the offset (seek backward)
-                    file.seek(offset);
-
-                    // Read the key-value pair
-                    int fetchedKeyLength = file.readInt();
-                    byte[] fetchedKeyBytes = new byte[fetchedKeyLength];
-                    file.readFully(fetchedKeyBytes);
-                    int fetchedValueLength = file.readInt();
-                    byte[] fetchedValueBytes = new byte[fetchedValueLength];
-                    file.readFully(fetchedValueBytes);
-
-                    String fetchedKey = new String(fetchedKeyBytes, StandardCharsets.UTF_8);
-                    String fetchedValue = new String(fetchedValueBytes, StandardCharsets.UTF_8);
-
-                    return fetchedValue;
-                } else {
-                    return null;
-                }
-            } else {
-                return null;
-            }
+            //storing the information into the object, that can be used to quiickly access the SSTable shown by the path
+            SSTableCacheObject ssTableCacheObject = new SSTableCacheObject(numEntries, filePath, bloomFilter, indexTable);
+            return ssTableCacheObject;
         }
     }
 
@@ -71,6 +47,7 @@ public class SSTableManager {
         String filePath = getNewSStableNamePath();
         try (DataOutputStream dos = new DataOutputStream(new FileOutputStream(filePath))) {
 
+            // Write the key and value lengths to the SSTable,
             int totalByteLength = 0;
 
             for(Map.Entry<String, String> entry : data.entrySet())
@@ -78,18 +55,26 @@ public class SSTableManager {
                 String key = entry.getKey();
                 String value = entry.getValue();
 
-                // Write the key and value to the SSTable
                 byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
                 byte[] valueBytes = value.getBytes(StandardCharsets.UTF_8);
+                // the "4" signifies the length added while entering the key and value "lengths" before the key and
+                // value themself, and the lengths are in "int" which uses 4 bytes.
                 totalByteLength += 4 + keyBytes.length + 4 + valueBytes.length;
             }
 
+            //we are adding the total byte length of the key_value pairs we are about to store including their length
             dos.writeInt(totalByteLength);
+
+            //we write the total number of keys
             dos.writeInt(data.size());
 
             long offset = dos.size();
+
+            //initiate bloomfilter
             int bloomFilterSize = data.size();
             BitSet bloomFilter = new BitSet(bloomFilterSize);
+
+            //initiate index
             TreeMap<String, Long> index = new TreeMap<>();
 
             for (Map.Entry<String, String> entry : data.entrySet()) {
@@ -100,19 +85,24 @@ public class SSTableManager {
                 byte[] keyBytes = key.getBytes(StandardCharsets.UTF_8);
                 byte[] valueBytes = value.getBytes(StandardCharsets.UTF_8);
 
+                //entering in key_length;key;value_length:value format(without the ":")
                 dos.writeInt(keyBytes.length);
                 dos.write(keyBytes);
                 dos.writeInt(valueBytes.length);
                 dos.write(valueBytes);
 
+                //a simple bloomfilter entry
                 bloomFilter.set(Math.abs(key.hashCode() % bloomFilterSize), true);
 
                 // Add key and offset to the index block
                 index.put(key, offset);
 
+                // end of current input is taken as the offset, which will later be stored in the index as entry point
+                // of the next key
                 offset = dos.size();
             }
 
+            // write the number of entries in the index
             dos.writeInt(index.size());
             for (Map.Entry<String, Long> indexEntry : index.entrySet()) {
                 String indexedKey = indexEntry.getKey();
@@ -120,11 +110,13 @@ public class SSTableManager {
 
                 byte[] indexedKeyBytes = indexedKey.getBytes(StandardCharsets.UTF_8);
 
+                //writing value in key_length:key:value_offset format(without the ":")
                 dos.writeInt(indexedKeyBytes.length);
                 dos.write(indexedKeyBytes);
                 dos.writeLong(indexOffset);
             }
 
+            //finally write the bloomfilter
             byte[] bloomFilterBytes = bloomFilter.toByteArray();
             dos.writeInt(bloomFilterBytes.length);
             dos.write(bloomFilterBytes);
@@ -132,10 +124,15 @@ public class SSTableManager {
         }
     }
 
+    /**
+     * Merges all the SSTables in the root folder.
+     * @throws IOException
+     */
     public static void mergeSSTables() throws IOException {
         // Map to store the merged data
         TreeMap<String, String> mergedData = new TreeMap<>();
         List<String> sstableFilePaths = new ArrayList<>();
+
         sstableFilePaths.addAll(getSSTablePaths(false));
 
         // Merge data from each SSTable
@@ -162,7 +159,17 @@ public class SSTableManager {
                     String value = new String(valueBytes, StandardCharsets.UTF_8);
 
                     // Add the key-value pair to the merged data
-                    mergedData.put(key, value);
+                    if(value.equals(SSTableConstants.TOMB_STONE))
+                    {
+                        if(mergedData.containsKey(key))
+                        {
+                            mergedData.remove(key);
+                        }
+                    }
+                    else
+                    {
+                        mergedData.put(key, value);
+                    }
                 }
             }
         }
@@ -175,7 +182,7 @@ public class SSTableManager {
     {
         try
         {
-            if (getNumOfSSTables() >= MAX_SSTABLE_COUNT)
+            if (getNumOfSSTables() >= SSTableConstants.MAX_SSTABLE_COUNT)
             {
                 mergeSSTables();
             }
@@ -199,35 +206,19 @@ public class SSTableManager {
         }
     }
 
-    public static String fetchValForKey(String key)
-    {
-        List<String> getAllSSTablePaths = getSSTablePaths(true);
-
-        try
-        {
-            for (String path : getAllSSTablePaths)
-            {
-                String val = fetchValueFromFile(key, path);
-                if (val != null)
-                {
-                    return val;
-                }
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
+    /**
+     * Returns all the SSTable file paths in the SSTABLE_ROOT_FOLDER, in an ordered manner, latest to oldest or v.v
+     * depending on the flag passed(we currently name the files in such a way that the later ones can be easily
+     * sorted to the front, since we use the time of creation as part of the file name)
+     * @param latestToOldest
+     * @return
+     */
     public static List<String> getSSTablePaths(boolean latestToOldest)
     {
         try
         {
             List<String> filesPathList = new ArrayList<>();
-            File ssTableDirectory = new File(SSTABLE_ROOT_FOLDER);
+            File ssTableDirectory = new File(SSTableConstants.SSTABLE_ROOT_FOLDER);
 
             File[] ssTables = ssTableDirectory.listFiles();
             if(latestToOldest)
@@ -256,7 +247,7 @@ public class SSTableManager {
 
     public static int getNumOfSSTables()
     {
-        File ssTableDirectory = new File(SSTABLE_ROOT_FOLDER);
+        File ssTableDirectory = new File(SSTableConstants.SSTABLE_ROOT_FOLDER);
         return ssTableDirectory.listFiles().length;
     }
 
@@ -270,7 +261,7 @@ public class SSTableManager {
 
         // Generate the file path using the formatted date and time
         String fileName = "sstable_" + formattedDateTime + ".dat";
-        String filePath = SSTABLE_ROOT_FOLDER + "\\" + fileName;
+        String filePath = SSTableConstants.SSTABLE_ROOT_FOLDER + "\\" + fileName;
         return fileName;
     }
 }
