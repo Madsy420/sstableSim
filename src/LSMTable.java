@@ -22,21 +22,22 @@ public class LSMTable {
         try
         {
             // if the memTable has reached its maximum length flush it into a SSTable
-            if (memTable.size() > SSTableConstants.MAX_MEMTABLE_SIZE)
+            if (memTable.size() >= SSTableConstants.MAX_MEMTABLE_SIZE)
             {
                 SSTableManager.flushToSSTable(memTable);
 
                 // we also clear the SSTable stored in cache, since there might be newer version of the data in the
                 // recently created SSTable, so next time we fetch a value we have to load the latest SSTable and check.
                 loadAllSSTablesToCache();
+                // clear the memTable
+                memTable.clear();
             }
         }
         catch(Exception e)
         {
             e.printStackTrace();
         }
-        // clear the memTable and add the newest value
-        memTable.clear();
+
         memTable.put(key, value);
     }
 
@@ -88,8 +89,8 @@ public class LSMTable {
     }
 
     /**
-     * Used to load a SSTable into cache, the SSTable loaded is the one with the latest copy of the value.
-     * returns value if such a SSTable is found, otherwise returns null.
+     * Used to load all SSTables to cache, this is a dummy placeholder for a better way to cache the
+     * important SSTables, determined by some metric.
      * @return
      */
     private void loadAllSSTablesToCache()

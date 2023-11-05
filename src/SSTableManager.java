@@ -261,7 +261,7 @@ public class SSTableManager {
 
         // Generate the file path using the formatted date and time
         String fileName = "sstable_" + formattedDateTime + ".dat";
-        String filePath = SSTableConstants.SSTABLE_ROOT_FOLDER + "\\" + fileName;
-        return fileName;
+        String filePath = SSTableConstants.SSTABLE_ROOT_FOLDER + "/" + fileName;
+        return filePath;
     }
 }
