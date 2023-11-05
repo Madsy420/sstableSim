@@ -121,5 +121,21 @@ public class testDriver {
         lsmTable.put("qw11asd10", SSTableConstants.TOMB_STONE);
         lsmTable.put("qw11asd21", SSTableConstants.TOMB_STONE);
         lsmTable.put("qw11asd8", SSTableConstants.TOMB_STONE);
+
+        lsmTable.put("q123w11asd1", SSTableConstants.TOMB_STONE);
+        lsmTable.put("q123w11asd", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw11231asd7", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw12311asd3", SSTableConstants.TOMB_STONE);
+        lsmTable.put("q123w11asd10", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw12311asd21", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw11123asd8", SSTableConstants.TOMB_STONE);
+
+        lsmTable.put("qw11345asd1", SSTableConstants.TOMB_STONE);
+        lsmTable.put("q345w11asd", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw34511asd7", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw11as345d3", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw11345asd10", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw43511asd21", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw43511asd8", SSTableConstants.TOMB_STONE);
     }
 }
