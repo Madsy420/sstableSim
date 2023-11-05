@@ -53,7 +53,6 @@ public class LSMTable {
         {
             return memTable.get(key);
         }
-
         return fetchValForKeyFromSSTable(key);
     }
 
@@ -63,7 +62,7 @@ public class LSMTable {
      * @param key
      * @return
      */
-    public String fetchValForKeyFromSSTable(String key)
+    private String fetchValForKeyFromSSTable(String key)
     {
         String val = null;
 
@@ -72,16 +71,14 @@ public class LSMTable {
         {
             loadAllSSTablesToCache();
         }
-        else
+
+        for(String path : ssTableCacheObjectList.descendingKeySet())
         {
-            for(String path : ssTableCacheObjectList.descendingKeySet())
+            SSTableCacheObject ssTableCacheObject = ssTableCacheObjectList.get(path);
+            val = ssTableCacheObject.getVal(key);
+            if(val != null)
             {
-                SSTableCacheObject ssTableCacheObject = ssTableCacheObjectList.get(path);
-                val = ssTableCacheObject.getVal(key);
-                if(val != null)
-                {
-                    break;
-                }
+                break;
             }
         }
 
@@ -114,9 +111,5 @@ public class LSMTable {
             e.printStackTrace();
         }
     }
-
-
-
-
 
 }

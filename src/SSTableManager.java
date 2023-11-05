@@ -173,9 +173,27 @@ public class SSTableManager {
                 }
             }
         }
+        deleteSSTables(sstableFilePaths);
 
         // Write the merged data to a new SSTable file
         convertToSSTable(mergedData);
+    }
+
+    private static void deleteSSTables(List<String> paths)
+    {
+        for(String ssTablePath : paths){
+            File file = new File(ssTablePath);
+
+            // Check if the file exists
+            if (file.exists()) {
+                // Attempt to delete the file
+                if (file.delete()) {
+                    System.err.println("Failed to delete the file: " + ssTablePath);
+                } else {
+                    System.err.println("File " + ssTablePath + " does not exist.");
+                }
+            }
+        }
     }
 
     private static void checkAndMergeSSTable()
