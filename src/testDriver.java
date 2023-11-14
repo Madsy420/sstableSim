@@ -26,6 +26,8 @@ public class testDriver {
         lsmTable.put("2asd21", "23dqa21");
         lsmTable.put("2asd8", "23dqa8");
 
+        System.out.println(lsmTable.get("asd1") + " verify is: 3dqa1");
+
         lsmTable.put("11asd1", "113dqa1");
         lsmTable.put("11asd", "113dqa");
         lsmTable.put("11asd7", "113dqa7");
@@ -74,6 +76,9 @@ public class testDriver {
         lsmTable.put("1asd21", "13dqa21234");
         lsmTable.put("1asd8", "13dqa8234");
 
+        System.out.println(lsmTable.get("asd1") + " verify is: 3dqa1");
+        System.out.println(lsmTable.get("112asd8") + " verify is: 1123dqa8");
+
         lsmTable.put("2asd1", SSTableConstants.TOMB_STONE);
         lsmTable.put("2asd", SSTableConstants.TOMB_STONE);
         lsmTable.put("2asd7", SSTableConstants.TOMB_STONE);
@@ -90,13 +95,13 @@ public class testDriver {
         lsmTable.put("11asd21", SSTableConstants.TOMB_STONE);
         lsmTable.put("11asd8", SSTableConstants.TOMB_STONE);
 
-        lsmTable.put("asd1", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd7", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd3", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd10", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd21", SSTableConstants.TOMB_STONE);
-        lsmTable.put("asd8", SSTableConstants.TOMB_STONE);
+        lsmTable.put("asd1", "1");
+        lsmTable.put("asd", "2");
+        lsmTable.put("asd7", "3");
+        lsmTable.put("asd3", "4");
+        lsmTable.put("asd10", "5");
+        lsmTable.put("asd21", "6");
+        lsmTable.put("asd8", "7");
 
         lsmTable.put("1asd1", SSTableConstants.TOMB_STONE);
         lsmTable.put("1asd", SSTableConstants.TOMB_STONE);
@@ -122,40 +127,41 @@ public class testDriver {
         lsmTable.put("qw11asd21", SSTableConstants.TOMB_STONE);
         lsmTable.put("qw11asd8", SSTableConstants.TOMB_STONE);
 
-        lsmTable.put("q123w11asd1", "sfadasfas atertetett4");
-        lsmTable.put("q123w11asd", "sfadasfas ayhrjyt4");
-        lsmTable.put("qw11231asd7", "sfadasfas a456wt4");
-        lsmTable.put("qw12311asd3", "sfadasfas at4jr7j");
-        lsmTable.put("q123w11asd10", "sfadasfas atheret4");
-        lsmTable.put("qw12311asd21", "sfadasfavwyewj7s at4");
-        lsmTable.put("qw11123asd8", "sfadasfas a4w3tewt4");
+        lsmTable.put("q123w11asd1", "sfadasfasatertetett4");
+        lsmTable.put("q123w11asd", "sfadasfasayhrjyt4");
+        lsmTable.put("qw11231asd7", "sfadasfasa456wt4");
+        lsmTable.put("qw12311asd3", "sfadasfasat4jr7j");
+        lsmTable.put("q123w11asd10", "sfadasfasatheret4");
+        lsmTable.put("qw12311asd21", "sfadasfavwyewj7sat4");
+        lsmTable.put("qw11123asd8", "sfadasfasa4w3tewt4");
 
-        lsmTable.put("qw11345asd1", "sfada2c4td3sfas at4");
-        lsmTable.put("q345w11asd", "sfadasfas avc345t4");
-        lsmTable.put("qw34511asd7", "sfadasfas6ctvy6y at4");
-        lsmTable.put("qw11as345d3", "sfadasfas cq34tcdat4");
-        lsmTable.put("qw11345asd10", "sfadasfas q23rs23at4");
-        lsmTable.put("qw43511asd21", "sfadasfas24r c at4");
-        lsmTable.put("qw43511asd8", "sfadasfas ctqw4cat4");
+        lsmTable.put("qw11345asd1", "sfada2c4td3sfasat4");
+        lsmTable.put("q345w11asd", "sfadasfasavc345t4");
+        lsmTable.put("qw34511asd7", "sfadasfas6ctvy6yat4");
+        lsmTable.put("qw11as345d3", "sfadasfascq34tcdat4");
+        lsmTable.put("qw11345asd10", "sfadasfasq23rs23at4");
+        lsmTable.put("qw43511asd21", "sfadasfas24rcat4");
+        lsmTable.put("qw43511asd8", "sfadasfasctqw4cat4");
 
-        lsmTable.put("q123w11asd1", SSTableConstants.TOMB_STONE);
-        lsmTable.put("q123w11asd", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw11231asd7", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw12311asd3", SSTableConstants.TOMB_STONE);
-        lsmTable.put("q123w11asd10", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw12311asd21", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw11123asd8", SSTableConstants.TOMB_STONE);
+        lsmTable.put("q123w32111asd1", "sfadasfasatertetett4");
+        lsmTable.put("q123w32111asd", "sfadasfasayhrjyt4");
+        lsmTable.put("qw11231231asd7", "sfadasfasa456wt4");
+        lsmTable.put("qw12332111asd3", "sfadasfasat4jr7j");
+        lsmTable.put("q123w13211asd10", "sfadasfasatheret4");
+        lsmTable.put("qw12311231asd21", "sfadasfavwyewj7sat4");
+        lsmTable.put("qw11123321asd8", "sfadasfasa4w3tewt4");
 
-        lsmTable.put("qw11345asd1", SSTableConstants.TOMB_STONE);
-        lsmTable.put("q345w11asd", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw34511asd7", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw11as345d3", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw11345asd10", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw43511asd21", SSTableConstants.TOMB_STONE);
-        lsmTable.put("qw43511asd8", SSTableConstants.TOMB_STONE);
+        lsmTable.put("qw113451231asd1", "sfada2c4td3sfas34534at4");
+        lsmTable.put("q345w111231asd", "sfadasfasavc33453445t4");
+        lsmTable.put("qw34511asd1237", "sfadasfas6ct345vy6yat4");
+        lsmTable.put("qw11as3412315d3", "sfadasfascq34tcdat43453");
+        lsmTable.put("qw11345asd23110", "sfadasfasq23rs2435343at4");
+        lsmTable.put("qw43511asd233111", "sfadasfas3453424rcat4");
+        lsmTable.put("qw43511asd321238", "sfada4353sfasctqw4cat4");
 
-        System.out.println(lsmTable.get("2asd1") + " verify is: null");
-        System.out.println(lsmTable.get("asd1") + " verify is: 3dqa1");
-        System.out.println(lsmTable.get("112asd8") + " verify is: 1123dqa8");
+        System.out.println(lsmTable.get("asd"));
+        System.out.println(lsmTable.get("q123w11asd1"));
+        System.out.println(lsmTable.get("qw11asd8"));
+
     }
 }
