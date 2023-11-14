@@ -39,6 +39,7 @@ public class SSTableCacheObject {
                 }
                 catch (IOException e)
                 {
+                    System.out.println(key);
                     e.printStackTrace();
                 }
             }
